@@ -9,6 +9,20 @@ def extract_code(ai_response):
     code_match = re.search(r"```python(.*?)```", ai_response, re.DOTALL)
     return code_match.group(1).strip() if code_match else None
 
+def _sanitize_matplotlib_code(code_str):
+    """清洗 AI 生成的 matplotlib 代码：移除已废弃参数，避免新版库报错"""
+    # 移除 plt.show()，避免在 Streamlit 里弹窗或阻塞
+    code_str = code_str.replace("plt.show()", "")
+    # 移除新版 matplotlib 已删除的 use_line_collection 参数
+    # 先处理 "..., use_line_collection=True/False" 这种前面有逗号的情况
+    code_str = re.sub(r",\s*use_line_collection\s*=\s*(?:True|False)\s*", "", code_str)
+    # 再处理 "use_line_collection=True/False, " 或单独存在的情况
+    code_str = re.sub(r"\s*use_line_collection\s*=\s*(?:True|False)\s*,?\s*", "", code_str)
+    # 清理可能留下的空括号或多余逗号，例如 stem(a, ) -> stem(a)
+    code_str = re.sub(r"\(\s*,", "(", code_str)
+    code_str = re.sub(r",\s*\)", ")", code_str)
+    return code_str
+
 def execute_and_render(code_str):
     """底层安全渲染引擎"""
     try:
@@ -16,13 +30,16 @@ def execute_and_render(code_str):
         plt.clf() 
         plt.close('all')
         
+        # 清洗 AI 代码里的已废弃参数
+        safe_code = _sanitize_matplotlib_code(code_str)
+        
         local_vars = {}
         # 强制注入 numpy 和 plt 兜底
         safe_globals = globals().copy()
         safe_globals['np'] = np
         safe_globals['plt'] = plt
         
-        exec(code_str, safe_globals, local_vars)
+        exec(safe_code, safe_globals, local_vars)
         
         fig = plt.gcf()
         if fig.get_axes(): 
