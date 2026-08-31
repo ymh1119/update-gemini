@@ -9,3 +9,5 @@ matplotlib
 numpy
 tiktoken
 scipy
+SQLAlchemy
+psycopg2-binary
