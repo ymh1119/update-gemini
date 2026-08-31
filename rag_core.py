@@ -27,10 +27,20 @@ def get_vectorstore(pdf_path, api_key):
         page_num = doc.metadata.get("page", 0) + 1  # PDF 索引从 0 开始，转换为实际页码
         doc.metadata["page_label"] = f"第 {page_num} 页"
     
+    # DeepSeek 官方不提供 Embedding 接口，需要单独配置 embedding provider
+    # 推荐：硅基流动 https://siliconflow.cn （免费额度足够本项目使用）
+    # 在 Streamlit Secrets 中添加：
+    #   EMBEDDING_API_KEY = "sk-..."          # 硅基流动 API Key
+    #   EMBEDDING_BASE_URL = "https://api.siliconflow.cn/v1"
+    #   EMBEDDING_MODEL = "BAAI/bge-large-zh-v1.5"   # 中文 Embedding 效果较好
+    embedding_api_key = st.secrets.get("EMBEDDING_API_KEY", api_key)
+    embedding_base_url = st.secrets.get("EMBEDDING_BASE_URL", "https://api.deepseek.com/v1")
+    embedding_model = st.secrets.get("EMBEDDING_MODEL", "text-embedding-3-small")
+    
     embeddings = OpenAIEmbeddings(
-        model="text-embedding-3-small",
-        api_key=api_key,
-        base_url="https://api.deepseek.com/v1" # 或 OpenAI / 硅基流动等 Embedding 节点
+        model=embedding_model,
+        api_key=embedding_api_key,
+        base_url=embedding_base_url
     )
     
     vectorstore = FAISS.from_documents(docs, embeddings)
@@ -86,10 +96,15 @@ def init_rag_system(api_key, expert_mode, pdf_name):
     """初始化带课本页码检索的对话链"""
     system_prompt = EXPERT_PROMPTS.get(expert_mode, EXPERT_PROMPTS["🔍 深度答疑专家 (讲解/解惑)"])
     
+    # DeepSeek 已下线 deepseek-chat / deepseek-reasoner 别名
+    # 2026-07-24 后需使用 deepseek-v4-flash 或 deepseek-v4-pro
+    # 可在 Streamlit Secrets 里用 CHAT_MODEL 自定义，默认用 deepseek-v4-flash
+    chat_model = st.secrets.get("CHAT_MODEL", "deepseek-v4-flash")
+    
     llm = ChatOpenAI(
         api_key=api_key,
-        model="deepseek-chat", 
-        base_url="https://api.deepseek.com/v1", 
+        model=chat_model,
+        base_url="https://api.deepseek.com/v1",
         max_tokens=2048,
         temperature=0.1
     )
