@@ -62,7 +62,7 @@ expert_modes = [
 selected_expert = st.sidebar.radio("请选择你的专属 AI 助教", expert_modes)
 
 # 指向你的课本文件名
-PDF_FILE_PATH = "信号与系统_PDF电子书下载+带书签目录+高清完整版(1).pdf" 
+PDF_FILE_PATH = "textbook.pdf" 
 
 # 4. 历史记录模块
 st.sidebar.markdown("---")
