@@ -25,7 +25,7 @@ def log_interaction(username, expert_mode, session_id, query, response):
             "ai_response": response
         }).execute()
     except Exception as e:
-        print(f"⚠️ 写入云数据库失败: {e}")
+        st.warning(f"⚠️ 写入云数据库失败（历史记录将不会保存）: {e}")
 
 def load_user_history(username):
     history = {
@@ -52,7 +52,7 @@ def load_user_history(username):
                 history[expert_mode][session_id].append({"role": "user", "content": query, "time": time_str})
                 history[expert_mode][session_id].append({"role": "assistant", "content": response_text, "time": time_str})
     except Exception as e:
-        print(f"⚠️ 读取云数据库历史失败: {e}")
+        st.sidebar.warning(f"⚠️ 读取云数据库历史失败: {e}")
         
     for mode in history:
         if not history[mode]:
@@ -65,4 +65,4 @@ def rename_session_in_db(username, expert_mode, old_title, new_title):
         supabase = get_supabase()
         supabase.table("chat_logs").update({"session_id": new_title}).eq("username", username).eq("expert_mode", expert_mode).eq("session_id", old_title).execute()
     except Exception as e:
-        print(f"⚠️ 更新对话标题失败: {e}")
+        st.warning(f"⚠️ 更新对话标题失败: {e}")
