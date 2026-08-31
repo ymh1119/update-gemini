@@ -40,7 +40,12 @@ def get_vectorstore(pdf_path, api_key):
     embeddings = OpenAIEmbeddings(
         model=embedding_model,
         api_key=embedding_api_key,
-        base_url=embedding_base_url
+        base_url=embedding_base_url,
+        # 关键：非 OpenAI 服务商（如硅基流动）必须关闭此选项，
+        # 否则 LangChain 会发送 token ID 数组，对方返回 400 错误 20015
+        check_embedding_ctx_length=False,
+        # 避免 base64 编码兼容性问题
+        encoding_format="float",
     )
     
     vectorstore = FAISS.from_documents(docs, embeddings)
@@ -125,7 +130,7 @@ def init_rag_system(api_key, expert_mode, pdf_name):
     # 结合 RAG 检索链
     def get_context(inputs):
         if retriever:
-            docs = retriever.invoke(inputs["query"])
+            docs = retriever.get_relevant_documents(inputs["query"])
             return format_docs(docs)
         return "未找到相关课本上下文。"
 
