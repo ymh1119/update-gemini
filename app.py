@@ -61,8 +61,8 @@ expert_modes = [
 ]
 selected_expert = st.sidebar.radio("请选择你的专属 AI 助教", expert_modes)
 
-# 指向你的课本文件名
-PDF_FILE_PATH = "textbook.pdf" 
+# 指向你的课本文件名（建议使用纯英文名，避免中文/括号/空格在不同系统下的编码问题）
+PDF_FILE_PATH = "textbook.pdf"
 
 # 4. 历史记录模块
 st.sidebar.markdown("---")
@@ -179,7 +179,10 @@ if prompt := st.chat_input("输入你的问题（系统会自动检索课本页�
             except KeyError:
                 st.error("🔑 发生错误：未能从系统配置(Secrets)中找到 API_KEY，请检查配置！")
             except Exception as e:
+                import traceback
                 st.error(f"❌ 系统发生异常: {e}")
+                with st.expander("查看详细报错（定位问题用）"):
+                    st.code(traceback.format_exc(), language="text")
                 
         if was_renamed:
             st.rerun()
