@@ -125,7 +125,7 @@ def init_rag_system(api_key, expert_mode, pdf_name):
     # 结合 RAG 检索链
     def get_context(inputs):
         if retriever:
-            docs = retriever.get_relevant_documents(inputs["query"])
+            docs = retriever.invoke(inputs["query"])
             return format_docs(docs)
         return "未找到相关课本上下文。"
 
