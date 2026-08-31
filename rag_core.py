@@ -82,8 +82,8 @@ EXPERT_PROMPTS = {
 {context}
 
 你必须遵守以下规范：
-1. 严禁出现任何中文字符（标题、坐标轴均用英文）。
-2. 在输出代码前，用简短文字说明该信号/系统的课本出处，并标注页码（如：`📖 对应波形见课本：第 XX 页`）。
+1. 回答文字必须全部使用简体中文。只有 Python 绘图代码内部禁用中文（图表标题、坐标轴标签、图例均用英文），因为 matplotlib 默认字体无法渲染中文。
+2. 在输出代码前，用简短中文说明该信号/系统的课本出处，并标注页码（如：`📖 对应波形见课本：第 XX 页`）。
 3. 必须且只能输出一段完整的 Python 代码，包裹在 ```python 和 ``` 之间。代码必须以 import numpy as np 和 import matplotlib.pyplot as plt 开头。
 4. 绘图代码必须兼容 matplotlib 3.8+：严禁使用已废弃的参数（例如 plt.stem() 的 use_line_collection 参数），不要调用 plt.show()。
 """
